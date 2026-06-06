@@ -113,9 +113,9 @@ class CyberPanel(ctk.CTkFrame):
                              highlightthickness=0, cursor='')
         self._cv.place(x=0, y=0, relwidth=1, relheight=1)
         self._cv.lower('all')
-        self.bind('<Configure>', lambda e: self.after(10, self._draw))
+        self.bind('<Configure>', lambda e: self.after(10, self._draw_cyber))
 
-    def _draw(self):
+    def _draw_cyber(self):
         self._cv.configure(bg=str(self.cget('fg_color')))
         self._cv.delete('all')
         w, h = self.winfo_width(), self.winfo_height()
@@ -423,7 +423,7 @@ class DashboardPage(ctk.CTkFrame):
 
         hp = CyberPanel(left, accent=CYAN, title='HEALTH')
         hp.pack(fill='x', pady=(0,10))
-        inner_hp = frame(hp, color=CARD)
+        inner_hp = tk.Frame(hp, bg=CARD, bd=0, highlightthickness=0)
         inner_hp.place(x=6, y=14, relwidth=1, relheight=1, width=-12, height=-20)
 
         self._health = HealthDisplay(inner_hp, bg=CARD, width=200, height=200)
@@ -432,7 +432,7 @@ class DashboardPage(ctk.CTkFrame):
         # Stats
         sp = CyberPanel(left, accent=CYAN_DIM, title='COUNTERS')
         sp.pack(fill='x')
-        inner_sp = frame(sp, color=CARD)
+        inner_sp = tk.Frame(sp, bg=CARD, bd=0, highlightthickness=0)
         inner_sp.place(x=6, y=14, relwidth=1, relheight=1, width=-12, height=-20)
         inner_sp.pack_propagate(False)
 
@@ -474,7 +474,7 @@ class DashboardPage(ctk.CTkFrame):
         # Issues
         ip = CyberPanel(right, accent=CYAN_DIM, title='RECENT ISSUES')
         ip.grid(row=1, column=0, sticky='nsew')
-        inner_ip = frame(ip, color=CARD)
+        inner_ip = tk.Frame(ip, bg=CARD, bd=0, highlightthickness=0)
         inner_ip.place(x=6, y=14, relwidth=1, relheight=1, width=-12, height=-20)
         inner_ip.grid_columnconfigure(0, weight=1)
         inner_ip.grid_rowconfigure(0, weight=1)
@@ -583,7 +583,7 @@ class DiagnosticsPage(ctk.CTkFrame):
         fc.configure(width=180)
         fc.grid(row=0, column=0, sticky='ns', padx=(0,10))
         fc.grid_propagate(False)
-        fi = frame(fc, color=CARD)
+        fi = tk.Frame(fc, bg=CARD, bd=0, highlightthickness=0)
         fi.place(x=6, y=14, relwidth=1, relheight=1, width=-12, height=-20)
 
         label(fi, 'SEVERITY', size=8, bold=True, color=TXT3).pack(anchor='w', padx=10, pady=(10,2))
@@ -756,7 +756,7 @@ class FixCenterPage(ctk.CTkFrame):
         # Fix list
         fp = CyberPanel(body, accent=CYAN_DIM, title='AVAILABLE FIXES')
         fp.grid(row=0, column=0, sticky='nsew', padx=(0,10))
-        fi = frame(fp, color=CARD)
+        fi = tk.Frame(fp, bg=CARD, bd=0, highlightthickness=0)
         fi.place(x=6, y=14, relwidth=1, relheight=1, width=-12, height=-20)
         fi.grid_columnconfigure(0, weight=1)
         fi.grid_rowconfigure(0, weight=1)
@@ -769,7 +769,7 @@ class FixCenterPage(ctk.CTkFrame):
         # Log
         lp = CyberPanel(body, accent=CYAN_DIM, title='EXECUTION LOG')
         lp.grid(row=0, column=1, sticky='nsew')
-        li = frame(lp, color=CARD)
+        li = tk.Frame(lp, bg=CARD, bd=0, highlightthickness=0)
         li.place(x=6, y=14, relwidth=1, relheight=1, width=-12, height=-20)
         li.grid_columnconfigure(0, weight=1)
         li.grid_rowconfigure(0, weight=1)
@@ -882,7 +882,7 @@ class ReportPage(ctk.CTkFrame):
 
         panel = CyberPanel(self, accent=CYAN_DIM, title='OUTPUT')
         panel.grid(row=1, column=0, sticky='nsew', padx=20, pady=(0,20))
-        inner = frame(panel, color=CARD)
+        inner = tk.Frame(panel, bg=CARD, bd=0, highlightthickness=0)
         inner.place(x=6, y=14, relwidth=1, relheight=1, width=-12, height=-20)
         inner.grid_columnconfigure(0, weight=1)
         inner.grid_rowconfigure(0, weight=1)
