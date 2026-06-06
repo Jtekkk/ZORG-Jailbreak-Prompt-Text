@@ -127,6 +127,61 @@ ALL_FIXES: List[FixMeta] = [
             'Reset just the Winsock catalogue without touching TCP/IP.',
             requires_admin=True, category='Network', severity_hint='warning',
             estimated_time='Instant'),
+
+    FixMeta('fix_sync_time',      'Sync Windows Time (NTP)',
+            'Force an immediate NTP time synchronisation and restart the Windows Time service.',
+            requires_admin=True, category='Network', severity_hint='warning',
+            estimated_time='Instant'),
+
+    FixMeta('fix_enable_firewall', 'Enable Windows Firewall',
+            'Turn on Windows Firewall for all profiles (Domain, Private, Public).',
+            requires_admin=True, category='Security', severity_hint='critical',
+            estimated_time='Instant'),
+
+    FixMeta('fix_enable_uac',     'Enable UAC',
+            'Re-enable User Account Control in the registry and prompt for restart.',
+            requires_admin=True, category='Security', severity_hint='critical',
+            estimated_time='Instant'),
+
+    FixMeta('fix_enable_system_restore', 'Enable System Restore',
+            'Enable Volume Shadow Copy and create an immediate restore point.',
+            requires_admin=True, category='Reliability', severity_hint='warning',
+            estimated_time='1–3 min'),
+
+    FixMeta('fix_clear_minidumps', 'Clear Crash Dump Files',
+            'Delete BSOD minidump files from C:\\Windows\\Minidump to free space.',
+            requires_admin=True, category='Reliability', severity_hint='info',
+            estimated_time='Instant'),
+
+    FixMeta('fix_disable_hibernate', 'Disable Hibernation',
+            'Run powercfg /h off to delete hiberfil.sys and reclaim disk space.',
+            requires_admin=True, category='Performance', severity_hint='info',
+            estimated_time='Instant'),
+
+    FixMeta('fix_rebuild_wmi',    'Rebuild WMI Repository',
+            'Stop WMI, rename the broken repository, and rebuild from scratch.',
+            requires_admin=True, category='System', severity_hint='critical',
+            estimated_time='2–5 min'),
+
+    FixMeta('fix_open_device_manager', 'Open Device Manager',
+            'Launch Device Manager so you can update or roll back problematic drivers.',
+            requires_admin=False, category='Drivers', severity_hint='warning',
+            estimated_time='Instant'),
+
+    FixMeta('fix_open_startup',   'Open Startup Manager',
+            'Open Task Manager on the Startup tab to disable unnecessary startup programs.',
+            requires_admin=False, category='Startup', severity_hint='info',
+            estimated_time='Instant'),
+
+    FixMeta('fix_repair_vcredist', 'Repair Visual C++ Runtimes',
+            'Open Apps & Features to find and repair Microsoft Visual C++ Redistributables.',
+            requires_admin=False, category='System', severity_hint='info',
+            estimated_time='Instant'),
+
+    FixMeta('fix_reset_store',    'Reset Microsoft Store Cache',
+            'Run wsreset.exe to clear the Windows Store cache and fix install failures.',
+            requires_admin=False, category='System', severity_hint='info',
+            estimated_time='~1 min'),
 ]
 
 FIX_MAP: Dict[str, FixMeta] = {f.id: f for f in ALL_FIXES}
@@ -315,28 +370,182 @@ class DiagnosticFixer:
         return FixResult(success=False, message=f"Failed to start '{svc}'",
                          details=(out + err)[:300])
 
+    def fix_sync_time(self) -> FixResult:
+        if not is_admin():
+            return FixResult(success=False, message='Administrator privileges required')
+        steps = [
+            (['net', 'start', 'W32Time'],            'Start W32Time service'),
+            (['w32tm', '/config', '/syncfromflags:auto', '/update'], 'Configure NTP'),
+            (['w32tm', '/resync', '/force'],          'Force time sync'),
+        ]
+        log = []
+        for cmd, label in steps:
+            ok, _, _ = _run(cmd, timeout=15)
+            log.append(f'{"✓" if ok else "~"} {label}')
+        return FixResult(success=True, message='Time sync forced',
+                         details='\n'.join(log))
+
+    def fix_enable_firewall(self) -> FixResult:
+        if not is_admin():
+            return FixResult(success=False, message='Administrator privileges required')
+        ok, out, err = _run(
+            ['netsh', 'advfirewall', 'set', 'allprofiles', 'state', 'on'],
+            timeout=15)
+        if ok or 'ok' in out.lower():
+            return FixResult(success=True, message='Windows Firewall enabled for all profiles')
+        return FixResult(success=False, message='Could not enable firewall', details=err)
+
+    def fix_enable_uac(self) -> FixResult:
+        if not is_admin():
+            return FixResult(success=False, message='Administrator privileges required')
+        ok, _, err = _run(
+            ['reg', 'add',
+             r'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System',
+             '/v', 'EnableLUA', '/t', 'REG_DWORD', '/d', '1', '/f'],
+            timeout=10)
+        if ok:
+            return FixResult(success=True,
+                             message='UAC re-enabled — restart required',
+                             requires_reboot=True)
+        return FixResult(success=False, message='Failed to enable UAC', details=err)
+
+    def fix_enable_system_restore(self) -> FixResult:
+        if not is_admin():
+            return FixResult(success=False, message='Administrator privileges required')
+        # Enable VSS service and create a restore point via PowerShell
+        ok, out, err = _run(
+            ['powershell', '-NoProfile', '-Command',
+             'Enable-ComputerRestore -Drive "C:\\"; '
+             'Checkpoint-Computer -Description "WinDiag restore point" '
+             '-RestorePointType MODIFY_SETTINGS'],
+            timeout=60)
+        if ok:
+            return FixResult(success=True, message='System Restore enabled and restore point created')
+        return FixResult(success=False,
+                         message='Could not enable System Restore',
+                         details='May require Group Policy changes.')
+
+    def fix_clear_minidumps(self) -> FixResult:
+        if not is_admin():
+            return FixResult(success=False, message='Administrator privileges required')
+        import glob as _glob
+        minidump = r'C:\Windows\Minidump'
+        count = 0
+        if os.path.isdir(minidump):
+            for f in _glob.glob(os.path.join(minidump, '*.dmp')):
+                try:
+                    os.remove(f)
+                    count += 1
+                except OSError:
+                    pass
+        full = r'C:\Windows\MEMORY.DMP'
+        if os.path.isfile(full):
+            try:
+                os.remove(full)
+                count += 1
+            except OSError:
+                pass
+        return FixResult(success=True, message=f'Removed {count} crash dump file(s)')
+
+    def fix_disable_hibernate(self) -> FixResult:
+        if not is_admin():
+            return FixResult(success=False, message='Administrator privileges required')
+        ok, out, err = _run(['powercfg', '/h', 'off'], timeout=15)
+        if ok:
+            return FixResult(success=True,
+                             message='Hibernation disabled — hiberfil.sys deleted',
+                             details='Fast Startup is also now disabled.')
+        return FixResult(success=False, message='Could not disable hibernation', details=err)
+
+    def fix_rebuild_wmi(self) -> FixResult:
+        if not is_admin():
+            return FixResult(success=False, message='Administrator privileges required')
+        self._progress('Stopping WMI service…', 10)
+        cmds = [
+            (['net', 'stop', 'winmgmt', '/y'],          'Stop WMI'),
+            (['winmgmt', '/resetrepository'],             'Reset repository'),
+            (['net', 'start', 'winmgmt'],                'Start WMI'),
+            (['winmgmt', '/verifyrepository'],            'Verify repository'),
+        ]
+        log = []
+        for cmd, label in cmds:
+            ok, _, _ = _run(cmd, timeout=60)
+            log.append(f'{"✓" if ok else "~"} {label}')
+        return FixResult(success=True, message='WMI repository rebuilt',
+                         details='\n'.join(log))
+
+    def fix_open_device_manager(self) -> FixResult:
+        try:
+            subprocess.Popen(['devmgmt.msc'])
+            return FixResult(success=True,
+                             message='Device Manager opened',
+                             details='Look for devices with yellow warning icons.')
+        except Exception as e:
+            return FixResult(success=False, message='Could not open Device Manager', details=str(e))
+
+    def fix_open_startup(self) -> FixResult:
+        try:
+            subprocess.Popen(['taskmgr', '/0', '/startup'])
+            return FixResult(success=True,
+                             message='Task Manager Startup tab opened',
+                             details='Right-click programs and choose Disable to speed up boot.')
+        except Exception:
+            try:
+                subprocess.Popen('start ms-settings:startupapps', shell=True)
+                return FixResult(success=True, message='Startup Apps settings opened')
+            except Exception as e:
+                return FixResult(success=False, message='Could not open startup manager', details=str(e))
+
+    def fix_repair_vcredist(self) -> FixResult:
+        try:
+            subprocess.Popen('start ms-settings:appsfeatures', shell=True)
+            return FixResult(success=True,
+                             message='Apps & Features opened',
+                             details='Search for "Visual C++" and click Modify/Repair on each.')
+        except Exception as e:
+            return FixResult(success=False, message='Could not open Apps & Features', details=str(e))
+
+    def fix_reset_store(self) -> FixResult:
+        try:
+            subprocess.Popen(['wsreset.exe'])
+            return FixResult(success=True,
+                             message='Microsoft Store cache reset started',
+                             details='Store will open automatically when done.')
+        except Exception as e:
+            return FixResult(success=False, message='Could not run wsreset', details=str(e))
+
     # -------------------------------------------------------------------
     # Dispatch
     # -------------------------------------------------------------------
 
     def apply_fix(self, fix_id: str, **kwargs) -> FixResult:
         dispatch = {
-            'fix_temp_cleanup':   self.fix_temp_cleanup,
-            'fix_disk_cleanup':   self.fix_disk_cleanup,
-            'fix_flush_dns':      self.fix_flush_dns,
-            'fix_network_reset':  self.fix_network_reset,
-            'fix_reset_winsock':  self.fix_reset_winsock,
-            'fix_sfc_dism':       self.fix_sfc_dism,
-            'fix_dism_only':      self.fix_dism_only,
-            'fix_windows_update': self.fix_windows_update,
-            'fix_enable_defender':self.fix_enable_defender,
-            'fix_check_disk':     lambda: self.fix_check_disk(kwargs.get('drive', 'C:')),
-            'fix_clear_prefetch': self.fix_clear_prefetch,
+            'fix_temp_cleanup':          self.fix_temp_cleanup,
+            'fix_disk_cleanup':          self.fix_disk_cleanup,
+            'fix_flush_dns':             self.fix_flush_dns,
+            'fix_network_reset':         self.fix_network_reset,
+            'fix_reset_winsock':         self.fix_reset_winsock,
+            'fix_sfc_dism':              self.fix_sfc_dism,
+            'fix_dism_only':             self.fix_dism_only,
+            'fix_windows_update':        self.fix_windows_update,
+            'fix_enable_defender':       self.fix_enable_defender,
+            'fix_check_disk':            lambda: self.fix_check_disk(kwargs.get('drive', 'C:')),
+            'fix_clear_prefetch':        self.fix_clear_prefetch,
+            'fix_sync_time':             self.fix_sync_time,
+            'fix_enable_firewall':       self.fix_enable_firewall,
+            'fix_enable_uac':            self.fix_enable_uac,
+            'fix_enable_system_restore': self.fix_enable_system_restore,
+            'fix_clear_minidumps':       self.fix_clear_minidumps,
+            'fix_disable_hibernate':     self.fix_disable_hibernate,
+            'fix_rebuild_wmi':           self.fix_rebuild_wmi,
+            'fix_open_device_manager':   self.fix_open_device_manager,
+            'fix_open_startup':          self.fix_open_startup,
+            'fix_repair_vcredist':       self.fix_repair_vcredist,
+            'fix_reset_store':           self.fix_reset_store,
         }
 
         if fix_id.startswith('fix_start_service_'):
-            svc = fix_id[len('fix_start_service_'):]
-            return self.fix_start_service(svc)
+            return self.fix_start_service(fix_id[len('fix_start_service_'):])
 
         fn = dispatch.get(fix_id)
         if fn:
