@@ -40,14 +40,14 @@ TXT3     = '#2A2A50'
 TXT_C    = '#80F0FF'
 
 # ── FONTS ─────────────────────────────────────────────────────────────────────
-F_TITLE = ('Consolas', 18, 'bold')
-F_HEAD  = ('Consolas', 13, 'bold')
-F_SUB   = ('Consolas', 11, 'bold')
-F_BODY  = ('Consolas', 11)
-F_SMALL = ('Consolas', 9)
-F_HUD   = ('Consolas', 42, 'bold')
-F_MED   = ('Consolas', 22, 'bold')
-F_MONO  = ('Consolas', 11)
+F_TITLE = ('Consolas', 24, 'bold')
+F_HEAD  = ('Consolas', 17, 'bold')
+F_SUB   = ('Consolas', 14, 'bold')
+F_BODY  = ('Consolas', 14)
+F_SMALL = ('Consolas', 12)
+F_HUD   = ('Consolas', 56, 'bold')
+F_MED   = ('Consolas', 28, 'bold')
+F_MONO  = ('Consolas', 14)
 
 SEV_COLORS = {Severity.CRITICAL: CRIT, Severity.WARNING: WARN, Severity.INFO: INFO}
 SEV_BG     = {Severity.CRITICAL: PINK_DIM, Severity.WARNING: YELLOW_DIM, Severity.INFO: CYAN_DIM}
@@ -80,23 +80,23 @@ def save_settings(s: Dict):
 def frame(parent, color=CARD, radius=0, **kw) -> ctk.CTkFrame:
     return ctk.CTkFrame(parent, fg_color=color, corner_radius=radius, **kw)
 
-def label(parent, text='', size=11, bold=False, color=TXT, **kw) -> ctk.CTkLabel:
+def label(parent, text='', size=14, bold=False, color=TXT, **kw) -> ctk.CTkLabel:
     w = 'bold' if bold else 'normal'
     return ctk.CTkLabel(parent, text=text, font=('Consolas', size, w),
                         text_color=color, **kw)
 
-def btn(parent, text, cmd=None, w=120, h=32, fg=CYAN, hv=None, tc=BG, **kw) -> ctk.CTkButton:
+def btn(parent, text, cmd=None, w=140, h=38, fg=CYAN, hv=None, tc=BG, **kw) -> ctk.CTkButton:
     hv = hv or fg
     return ctk.CTkButton(parent, text=text, command=cmd, width=w, height=h,
                          fg_color=fg, hover_color=hv, text_color=tc,
-                         font=('Consolas', 11, 'bold'), corner_radius=0, **kw)
+                         font=('Consolas', 13, 'bold'), corner_radius=0, **kw)
 
 def neon_sep(parent, color=CYAN_DIM, h=1) -> ctk.CTkFrame:
     return ctk.CTkFrame(parent, fg_color=color, height=h, corner_radius=0)
 
 def section_header(parent, text: str, color=CYAN) -> ctk.CTkFrame:
     row = frame(parent, color='transparent')
-    label(row, f'▸ {text.upper()}', size=10, bold=True, color=color).pack(side='left')
+    label(row, f'▸ {text.upper()}', size=13, bold=True, color=color).pack(side='left')
     neon_sep(row, color=color).pack(side='left', fill='x', expand=True, padx=(8,0), pady=1)
     return row
 
@@ -135,7 +135,7 @@ class CyberPanel(ctk.CTkFrame):
             self._cv.create_rectangle(cs, -1, cs+tw, 1,
                                       fill=str(self.cget('fg_color')), outline='')
             self._cv.create_text(cs+4, 0, text=txt, fill=c,
-                                 font=('Consolas', 9, 'bold'), anchor='w')
+                                 font=('Consolas', 12, 'bold'), anchor='w')
 
     def get_inner(self) -> ctk.CTkFrame:
         f = frame(self, color=str(self.cget('fg_color')))
@@ -171,7 +171,7 @@ class ScanlineHeader(tk.Canvas):
 
 class CyberProgressBar(tk.Canvas):
     def __init__(self, parent, color=CYAN, bg_color=CARD, **kw):
-        kw.setdefault('height', 8)
+        kw.setdefault('height', 14)
         kw.setdefault('highlightthickness', 0)
         super().__init__(parent, bg=bg_color, **kw)
         self._color    = color
@@ -261,18 +261,18 @@ class HealthDisplay(tk.Canvas):
                              fill=c, outline='#FFFFFF', width=1)
 
         # Score text
-        self.create_text(cx, cy - 14, text=str(s),
-                         font=('Consolas', 34, 'bold'), fill=c)
-        self.create_text(cx, cy + 18, text='/ 100',
-                         font=('Consolas', 11), fill=TXT2)
+        self.create_text(cx, cy - 18, text=str(s),
+                         font=('Consolas', 44, 'bold'), fill=c)
+        self.create_text(cx, cy + 22, text='/ 100',
+                         font=('Consolas', 14), fill=TXT2)
 
         # Status label
         status = {range(80,101):'NOMINAL', range(55,80):'DEGRADED',
                   range(30,55):'CRITICAL', range(0,30):'SYSTEM FAILURE'}
         for r_obj, lbl in status.items():
             if s in r_obj:
-                self.create_text(cx, cy + 38, text=lbl,
-                                 font=('Consolas', 9, 'bold'), fill=c)
+                self.create_text(cx, cy + 48, text=lbl,
+                                 font=('Consolas', 12, 'bold'), fill=c)
                 break
 
         self._pulse += 1
@@ -305,7 +305,7 @@ class Sidebar(ctk.CTkFrame):
     ]
 
     def __init__(self, parent, on_nav, **kw):
-        super().__init__(parent, width=210, fg_color=PANEL, corner_radius=0, **kw)
+        super().__init__(parent, width=270, fg_color=PANEL, corner_radius=0, **kw)
         self.grid_propagate(False)
         self._on_nav = on_nav
         self._btns:  Dict[str, ctk.CTkButton] = {}
@@ -316,19 +316,19 @@ class Sidebar(ctk.CTkFrame):
         self.grid_rowconfigure(2, weight=1)
 
         # Logo block
-        logo = tk.Canvas(self, bg=CYAN_BG, height=58, highlightthickness=0)
+        logo = tk.Canvas(self, bg=CYAN_BG, height=76, highlightthickness=0)
         logo.grid(row=0, column=0, sticky='ew')
         logo.bind('<Configure>', lambda e: self._draw_logo(logo))
 
     def _draw_logo(self, cv):
         cv.delete('all')
-        w = cv.winfo_width() or 210
+        w = cv.winfo_width() or 270
         cv.create_line(0, 0, w, 0, fill=CYAN, width=2)
-        cv.create_line(0, 57, w, 57, fill=CYAN_DIM, width=1)
-        cv.create_text(w//2, 20, text='WINDIAG.EXE',
-                       font=('Consolas', 14, 'bold'), fill=CYAN)
-        cv.create_text(w//2, 38, text='v1.0  //  WIN10/11',
-                       font=('Consolas', 9), fill=TXT2)
+        cv.create_line(0, 75, w, 75, fill=CYAN_DIM, width=1)
+        cv.create_text(w//2, 26, text='WINDIAG.EXE',
+                       font=('Consolas', 18, 'bold'), fill=CYAN)
+        cv.create_text(w//2, 52, text='v1.0  //  WIN10/11',
+                       font=('Consolas', 12), fill=TXT2)
 
     def _build_nav(self):
         nav = frame(self, color='transparent')
@@ -336,9 +336,9 @@ class Sidebar(ctk.CTkFrame):
 
         for page_id, lbl in self.NAV:
             b = ctk.CTkButton(nav, text=lbl, anchor='w',
-                              font=('Consolas', 12),
+                              font=('Consolas', 15),
                               fg_color='transparent', hover_color=CARD2,
-                              text_color=TXT2, height=38, corner_radius=0,
+                              text_color=TXT2, height=50, corner_radius=0,
                               border_width=0,
                               command=lambda p=page_id: self._nav(p))
             b.pack(fill='x', padx=0, pady=1)
@@ -353,19 +353,19 @@ class Sidebar(ctk.CTkFrame):
         adm_frame.pack(fill='x', padx=12, pady=4)
         label(adm_frame,
               '✓ ADMIN MODE' if is_adm else '⚠ NO ADMIN',
-              size=9, bold=True,
+              size=12, bold=True,
               color=SUCC if is_adm else WARN).pack(anchor='w')
         if not is_adm:
             label(adm_frame, 'some fixes require elevation',
-                  size=8, color=TXT3).pack(anchor='w')
+                  size=11, color=TXT3).pack(anchor='w')
             btn(adm_frame, '[ ELEVATE ]', cmd=lambda: (request_elevation(), sys.exit()),
-                w=150, h=26, fg=YELLOW_DIM, hv=YELLOW, tc=YELLOW).pack(anchor='w', pady=(4,0))
+                w=170, h=34, fg=YELLOW_DIM, hv=YELLOW, tc=YELLOW).pack(anchor='w', pady=(4,0))
 
         # Bottom info
         info = frame(self, color='transparent')
         info.grid(row=3, column=0, sticky='ew', padx=12, pady=8)
-        label(info, platform.node()[:22], size=8, color=TXT3).pack(anchor='w')
-        label(info, datetime.datetime.now().strftime('%Y.%m.%d'), size=8, color=TXT3).pack(anchor='w')
+        label(info, platform.node()[:22], size=11, color=TXT3).pack(anchor='w')
+        label(info, datetime.datetime.now().strftime('%Y.%m.%d'), size=11, color=TXT3).pack(anchor='w')
 
         self.grid_rowconfigure(2, weight=1)
 
@@ -401,12 +401,12 @@ class DashboardPage(ctk.CTkFrame):
         # Top bar
         top = frame(self, color='transparent')
         top.grid(row=0, column=0, sticky='ew', padx=20, pady=(16,0))
-        label(top, '// SYSTEM OVERVIEW', size=16, bold=True, color=CYAN).pack(side='left')
+        label(top, '// SYSTEM OVERVIEW', size=20, bold=True, color=CYAN).pack(side='left')
         btn(top, '[ RUN SCAN ]', cmd=self._app.start_scan,
-            w=140, h=34, fg=CYAN, hv=CYAN, tc=BG).pack(side='right')
+            w=160, h=42, fg=CYAN, hv=CYAN, tc=BG).pack(side='right')
 
         self._status_lbl = label(self, '> READY — AWAITING SCAN COMMAND',
-                                 size=9, color=TXT3)
+                                 size=12, color=TXT3)
         self._status_lbl.grid(row=0, column=0, sticky='w', padx=24, pady=(36,0))
 
         ScanlineHeader(self).grid(row=0, column=0, sticky='ew', pady=(0,0))
@@ -426,7 +426,7 @@ class DashboardPage(ctk.CTkFrame):
         inner_hp = tk.Frame(hp, bg=CARD, bd=0, highlightthickness=0)
         inner_hp.place(x=6, y=14, relwidth=1, relheight=1, width=-12, height=-20)
 
-        self._health = HealthDisplay(inner_hp, bg=CARD, width=200, height=200)
+        self._health = HealthDisplay(inner_hp, bg=CARD, width=260, height=260)
         self._health.pack(padx=16, pady=12)
 
         # Stats
@@ -444,9 +444,9 @@ class DashboardPage(ctk.CTkFrame):
         ]:
             row = frame(inner_sp, color='transparent')
             row.pack(fill='x', padx=12, pady=3)
-            label(row, icon, size=10, bold=True, color=color).pack(side='left')
-            label(row, key.upper(), size=9, color=TXT2).pack(side='left', padx=6)
-            v = label(row, '—', size=13, bold=True, color=color)
+            label(row, icon, size=13, bold=True, color=color).pack(side='left')
+            label(row, key.upper(), size=12, color=TXT2).pack(side='left', padx=8)
+            v = label(row, '—', size=17, bold=True, color=color)
             v.pack(side='right', padx=4)
             self._stat_lbls[key] = v
 
@@ -468,8 +468,8 @@ class DashboardPage(ctk.CTkFrame):
         ]):
             c = frame(sysrow, color='transparent')
             c.grid(row=0, column=i, padx=12, pady=8)
-            label(c, k, size=8, color=TXT3).pack(anchor='w')
-            label(c, v, size=10, bold=True, color=TXT_C).pack(anchor='w')
+            label(c, k, size=11, color=TXT3).pack(anchor='w')
+            label(c, v, size=13, bold=True, color=TXT_C).pack(anchor='w')
 
         # Issues
         ip = CyberPanel(right, accent=CYAN_DIM, title='RECENT ISSUES')
@@ -481,9 +481,9 @@ class DashboardPage(ctk.CTkFrame):
 
         hdr = frame(inner_ip, color='transparent')
         hdr.grid(row=0, column=0, sticky='ew', padx=12, pady=(8,4))
-        label(hdr, 'ACTIVE ALERTS', size=10, bold=True, color=TXT2).pack(side='left')
+        label(hdr, 'ACTIVE ALERTS', size=13, bold=True, color=TXT2).pack(side='left')
         btn(hdr, '[ VIEW ALL ]', cmd=lambda: self._app.nav('diagnostics'),
-            w=100, h=24, fg=BORDER, hv=BORDER2, tc=CYAN).pack(side='right')
+            w=120, h=32, fg=BORDER, hv=BORDER2, tc=CYAN).pack(side='right')
 
         self._issues_frame = ctk.CTkScrollableFrame(inner_ip, fg_color='transparent',
                                                      scrollbar_button_color=BORDER)
@@ -492,7 +492,7 @@ class DashboardPage(ctk.CTkFrame):
 
         self._empty_lbl = label(self._issues_frame,
                                 '> NO DATA — RUN SCAN TO POPULATE',
-                                size=10, color=TXT3)
+                                size=13, color=TXT3)
         self._empty_lbl.pack(pady=30)
 
     def update_results(self, issues: List[Issue], summary: Dict):
@@ -521,20 +521,20 @@ class DashboardPage(ctk.CTkFrame):
 
             # Severity stripe
             stripe = frame(row, color=sc)
-            stripe.configure(width=3)
+            stripe.configure(width=5)
             stripe.grid(row=0, column=0, rowspan=2, sticky='ns', padx=(0,8))
             stripe.grid_propagate(False)
 
-            label(row, icon, size=10, bold=True, color=sc).grid(
-                row=0, column=1, sticky='w', padx=(0,6), pady=(6,0))
-            label(row, issue.title[:65], size=10, bold=True).grid(
-                row=0, column=2, sticky='w', pady=(6,0))
-            label(row, issue.category.value.upper(), size=8, color=TXT3).grid(
-                row=1, column=1, columnspan=2, sticky='w', padx=(0,0), pady=(0,6))
+            label(row, icon, size=13, bold=True, color=sc).grid(
+                row=0, column=1, sticky='w', padx=(0,6), pady=(8,0))
+            label(row, issue.title[:65], size=13, bold=True).grid(
+                row=0, column=2, sticky='w', pady=(8,0))
+            label(row, issue.category.value.upper(), size=11, color=TXT3).grid(
+                row=1, column=1, columnspan=2, sticky='w', padx=(0,0), pady=(0,8))
 
             if issue.fix_available:
                 btn(row, '[FIX]', cmd=lambda fid=issue.fix_id: self._app.apply_fix(fid),
-                    w=60, h=24, fg=CYAN_DIM, hv=CYAN, tc=CYAN).grid(
+                    w=72, h=30, fg=CYAN_DIM, hv=CYAN, tc=CYAN).grid(
                     row=0, column=3, rowspan=2, padx=8)
 
     def set_status(self, msg: str, color=TXT3):
@@ -557,16 +557,16 @@ class DiagnosticsPage(ctk.CTkFrame):
 
         hdr = frame(self, color='transparent')
         hdr.grid(row=0, column=0, sticky='ew', padx=20, pady=(16,0))
-        label(hdr, '// SCAN & DIAGNOSE', size=16, bold=True, color=CYAN).pack(side='left')
+        label(hdr, '// SCAN & DIAGNOSE', size=20, bold=True, color=CYAN).pack(side='left')
         btn(hdr, '[ RUN SCAN ]', cmd=self._app.start_scan,
-            w=140, h=34, fg=CYAN, hv=CYAN, tc=BG).pack(side='right')
+            w=160, h=42, fg=CYAN, hv=CYAN, tc=BG).pack(side='right')
 
         # Progress block
         prog = frame(self, color=PANEL, border_width=1, border_color=BORDER)
         prog.grid(row=1, column=0, sticky='ew', padx=20, pady=(10,8))
         prog.grid_columnconfigure(0, weight=1)
 
-        self._prog_lbl = label(prog, '> READY', size=9, color=CYAN)
+        self._prog_lbl = label(prog, '> READY', size=12, color=CYAN)
         self._prog_lbl.grid(row=0, column=0, sticky='w', padx=12, pady=(8,2))
 
         self._prog_bar = CyberProgressBar(prog, color=CYAN, bg_color=PANEL)
@@ -580,32 +580,32 @@ class DiagnosticsPage(ctk.CTkFrame):
 
         # Filter column
         fc = CyberPanel(body, accent=CYAN_DIM, title='FILTERS')
-        fc.configure(width=180)
+        fc.configure(width=230)
         fc.grid(row=0, column=0, sticky='ns', padx=(0,10))
         fc.grid_propagate(False)
         fi = tk.Frame(fc, bg=CARD, bd=0, highlightthickness=0)
         fi.place(x=6, y=14, relwidth=1, relheight=1, width=-12, height=-20)
 
-        label(fi, 'SEVERITY', size=8, bold=True, color=TXT3).pack(anchor='w', padx=10, pady=(10,2))
+        label(fi, 'SEVERITY', size=11, bold=True, color=TXT3).pack(anchor='w', padx=10, pady=(10,2))
         self._sev_btns: Dict = {}
         for lbl_t, key, c in [('ALL',None,TXT2),('CRITICAL','Critical',CRIT),
                                 ('WARNING','Warning',WARN),('INFO','Info',INFO)]:
             b = ctk.CTkButton(fi, text=lbl_t, anchor='w',
-                              font=('Consolas',10), fg_color='transparent',
-                              hover_color=CARD2, text_color=c, height=28,
+                              font=('Consolas',13), fg_color='transparent',
+                              hover_color=CARD2, text_color=c, height=36,
                               corner_radius=0,
                               command=lambda k=key: self._set_sev(k))
             b.pack(fill='x', padx=6, pady=1)
             self._sev_btns[str(key)] = b
 
         neon_sep(fi, BORDER).pack(fill='x', padx=10, pady=6)
-        label(fi, 'CATEGORY', size=8, bold=True, color=TXT3).pack(anchor='w', padx=10, pady=(0,2))
+        label(fi, 'CATEGORY', size=11, bold=True, color=TXT3).pack(anchor='w', padx=10, pady=(0,2))
         self._cat_btns: Dict = {}
         for cat in [None] + list(ScanCategory):
             t = 'ALL' if cat is None else cat.value.upper()[:14]
             b = ctk.CTkButton(fi, text=t, anchor='w',
-                              font=('Consolas',9), fg_color='transparent',
-                              hover_color=CARD2, text_color=TXT2, height=26,
+                              font=('Consolas',12), fg_color='transparent',
+                              hover_color=CARD2, text_color=TXT2, height=32,
                               corner_radius=0,
                               command=lambda c=cat: self._set_cat(c))
             b.pack(fill='x', padx=6, pady=1)
@@ -619,7 +619,7 @@ class DiagnosticsPage(ctk.CTkFrame):
 
         lhdr = frame(lc, color='transparent')
         lhdr.grid(row=0, column=0, sticky='ew', pady=(0,6))
-        self._count_lbl = label(lhdr, 'NO SCAN DATA', size=9, color=TXT3)
+        self._count_lbl = label(lhdr, 'NO SCAN DATA', size=12, color=TXT3)
         self._count_lbl.pack(side='left')
 
         self._scroll = ctk.CTkScrollableFrame(lc, fg_color='transparent',
@@ -627,7 +627,7 @@ class DiagnosticsPage(ctk.CTkFrame):
         self._scroll.grid(row=1, column=0, sticky='nsew')
 
         self._empty_lbl = label(self._scroll, '> RUN A SCAN TO SEE RESULTS',
-                                size=11, color=TXT3)
+                                size=14, color=TXT3)
         self._empty_lbl.pack(pady=40)
 
     def _set_sev(self, key):
@@ -676,7 +676,7 @@ class DiagnosticsPage(ctk.CTkFrame):
         if not filtered:
             msg = '> NO RESULTS MATCH FILTER' if self._issues else '> ALL CLEAR'
             c   = TXT3 if self._issues else SUCC
-            label(self._scroll, msg, size=11, color=c).pack(pady=40)
+            label(self._scroll, msg, size=14, color=c).pack(pady=40)
             return
 
         for issue in filtered:
@@ -694,36 +694,36 @@ class DiagnosticsPage(ctk.CTkFrame):
 
         # Left severity bar
         bar = frame(card, color=sc)
-        bar.configure(width=4)
+        bar.configure(width=6)
         bar.grid(row=0, column=0, rowspan=3, sticky='ns')
         bar.grid_propagate(False)
 
         # Header row
         hdr = frame(card, color='transparent')
-        hdr.grid(row=0, column=1, sticky='ew', padx=(10,10), pady=(8,2))
+        hdr.grid(row=0, column=1, sticky='ew', padx=(12,12), pady=(10,2))
         hdr.grid_columnconfigure(1, weight=1)
 
-        label(hdr, icon, size=10, bold=True, color=sc).grid(row=0, column=0, padx=(0,8))
+        label(hdr, icon, size=13, bold=True, color=sc).grid(row=0, column=0, padx=(0,10))
 
         title_col = frame(hdr, color='transparent')
         title_col.grid(row=0, column=1, sticky='ew')
-        label(title_col, issue.title[:72], size=10, bold=True).pack(anchor='w')
+        label(title_col, issue.title[:72], size=13, bold=True).pack(anchor='w')
         meta = issue.category.value.upper()
         if issue.timestamp:
             try: meta += f'  ·  {issue.timestamp.strftime("%Y-%m-%d %H:%M")}'
             except Exception: pass
-        label(title_col, meta, size=8, color=TXT3).pack(anchor='w')
+        label(title_col, meta, size=11, color=TXT3).pack(anchor='w')
 
         # Description
-        label(card, issue.description, size=9, color=TXT2,
-              wraplength=640, justify='left').grid(
-            row=1, column=1, sticky='w', padx=(10,10), pady=(0,4))
+        label(card, issue.description, size=12, color=TXT2,
+              wraplength=800, justify='left').grid(
+            row=1, column=1, sticky='w', padx=(12,12), pady=(0,4))
 
         # Fix button
         if issue.fix_available and issue.fix_id:
             fix_row = frame(card, color='transparent')
-            fix_row.grid(row=2, column=1, sticky='e', padx=10, pady=(0,8))
-            btn(fix_row, '[ APPLY FIX ]', w=120, h=26,
+            fix_row.grid(row=2, column=1, sticky='e', padx=12, pady=(0,10))
+            btn(fix_row, '[ APPLY FIX ]', w=140, h=34,
                 cmd=lambda fid=issue.fix_id: self._app.apply_fix(fid),
                 fg=CYAN_DIM, hv=CYAN, tc=CYAN).pack()
 
@@ -742,9 +742,9 @@ class FixCenterPage(ctk.CTkFrame):
 
         hdr = frame(self, color='transparent')
         hdr.grid(row=0, column=0, sticky='ew', padx=20, pady=(16,12))
-        label(hdr, '// FIX.CENTER', size=16, bold=True, color=CYAN).pack(side='left')
+        label(hdr, '// FIX.CENTER', size=20, bold=True, color=CYAN).pack(side='left')
         adm = is_admin()
-        label(hdr, '[ ADMIN ]' if adm else '[ USER MODE ]', size=10, bold=True,
+        label(hdr, '[ ADMIN ]' if adm else '[ USER MODE ]', size=13, bold=True,
               color=SUCC if adm else WARN).pack(side='right')
 
         body = frame(self, color='transparent')
@@ -777,10 +777,10 @@ class FixCenterPage(ctk.CTkFrame):
         lhdr = frame(li, color='transparent')
         lhdr.pack(fill='x', padx=8, pady=(6,4))
         btn(lhdr, '[ CLR ]', cmd=self._clear_log,
-            w=60, h=22, fg=BORDER, hv=BORDER2, tc=TXT2).pack(side='right')
+            w=72, h=30, fg=BORDER, hv=BORDER2, tc=TXT2).pack(side='right')
 
         self._log = ctk.CTkTextbox(li, fg_color=BG, text_color=CYAN,
-                                    font=('Consolas', 10), corner_radius=0,
+                                    font=('Consolas', 13), corner_radius=0,
                                     state='disabled')
         self._log.pack(fill='both', expand=True, padx=8, pady=(0,8))
 
@@ -813,27 +813,27 @@ class FixCenterPage(ctk.CTkFrame):
         name_row = frame(hdr, color='transparent')
         name_row.grid(row=0, column=0, sticky='ew')
         name_row.grid_columnconfigure(0, weight=1)
-        label(name_row, fix.name.upper(), size=10, bold=True, color=TXT_C).grid(row=0, column=0, sticky='w')
+        label(name_row, fix.name.upper(), size=13, bold=True, color=TXT_C).grid(row=0, column=0, sticky='w')
 
         badges = frame(name_row, color='transparent')
         badges.grid(row=0, column=1)
         if fix.requires_admin:
-            ctk.CTkLabel(badges, text='ADMIN', font=('Consolas',8,'bold'),
+            ctk.CTkLabel(badges, text='ADMIN', font=('Consolas',11,'bold'),
                          fg_color=YELLOW_DIM, text_color=YELLOW,
-                         corner_radius=0, width=46, height=16).pack(side='left', padx=2)
+                         corner_radius=0, width=60, height=24).pack(side='left', padx=2)
         if is_sug:
-            ctk.CTkLabel(badges, text='SUGGESTED', font=('Consolas',8,'bold'),
+            ctk.CTkLabel(badges, text='SUGGESTED', font=('Consolas',11,'bold'),
                          fg_color=CYAN_DIM, text_color=CYAN,
-                         corner_radius=0, width=70, height=16).pack(side='left', padx=2)
+                         corner_radius=0, width=90, height=24).pack(side='left', padx=2)
 
-        label(card, fix.description, size=9, color=TXT2,
-              wraplength=300, justify='left').grid(
+        label(card, fix.description, size=12, color=TXT2,
+              wraplength=400, justify='left').grid(
             row=1, column=0, sticky='w', padx=10, pady=(0,4))
 
         foot = frame(card, color='transparent')
         foot.grid(row=2, column=0, sticky='ew', padx=10, pady=(0,8))
-        label(foot, f'⏱ {fix.estimated_time}', size=8, color=TXT3).pack(side='left')
-        btn(foot, '[ EXECUTE ]', w=100, h=26,
+        label(foot, f'⏱ {fix.estimated_time}', size=11, color=TXT3).pack(side='left')
+        btn(foot, '[ EXECUTE ]', w=120, h=34,
             cmd=lambda fid=fix.id: self._app.apply_fix(fid),
             fg=CYAN_DIM, hv=CYAN, tc=CYAN).pack(side='right')
 
@@ -868,7 +868,7 @@ class ReportPage(ctk.CTkFrame):
 
         hdr = frame(self, color='transparent')
         hdr.grid(row=0, column=0, sticky='ew', padx=20, pady=(16,12))
-        label(hdr, '// REPORT.LOG', size=16, bold=True, color=CYAN).pack(side='left')
+        label(hdr, '// REPORT.LOG', size=20, bold=True, color=CYAN).pack(side='left')
 
         brow = frame(hdr, color='transparent')
         brow.pack(side='right')
@@ -877,7 +877,7 @@ class ReportPage(ctk.CTkFrame):
                           ('[ SAVE .HTML ]', self._save_html)]:
             fg_c = CYAN if '[ GEN' in txt else BORDER
             tc_c = BG   if '[ GEN' in txt else CYAN
-            btn(brow, txt, cmd=cmd, w=120, h=30,
+            btn(brow, txt, cmd=cmd, w=140, h=38,
                 fg=fg_c, hv=CYAN, tc=tc_c).pack(side='left', padx=3)
 
         panel = CyberPanel(self, accent=CYAN_DIM, title='OUTPUT')
@@ -888,7 +888,7 @@ class ReportPage(ctk.CTkFrame):
         inner.grid_rowconfigure(0, weight=1)
 
         self._text = ctk.CTkTextbox(inner, fg_color=BG, text_color=CYAN,
-                                     font=('Consolas', 10), corner_radius=0,
+                                     font=('Consolas', 13), corner_radius=0,
                                      state='disabled')
         self._text.grid(row=0, column=0, sticky='nsew', padx=8, pady=8)
         self._show('> CLICK [ GENERATE ] TO BUILD DIAGNOSTIC REPORT\n')
@@ -1004,9 +1004,9 @@ class SettingsPage(ctk.CTkFrame):
 
         hdr = frame(self, color='transparent')
         hdr.grid(row=0, column=0, sticky='ew', padx=20, pady=(16,12))
-        label(hdr, '// CONFIG', size=16, bold=True, color=CYAN).pack(side='left')
+        label(hdr, '// CONFIG', size=20, bold=True, color=CYAN).pack(side='left')
         btn(hdr, '[ SAVE CONFIG ]', cmd=self._save,
-            w=150, h=34, fg=CYAN, hv=CYAN, tc=BG).pack(side='right')
+            w=180, h=42, fg=CYAN, hv=CYAN, tc=BG).pack(side='right')
 
         tabs = ctk.CTkTabview(self, fg_color=PANEL, corner_radius=0,
                                segmented_button_fg_color=CARD,
@@ -1026,7 +1026,7 @@ class SettingsPage(ctk.CTkFrame):
     def _cfg_row(self, parent, title: str) -> ctk.CTkFrame:
         f = frame(parent, color=CARD2, border_width=1, border_color=BORDER)
         f.pack(fill='x', pady=3)
-        label(f, f'▸ {title.upper()}', size=9, bold=True, color=CYAN).pack(
+        label(f, f'▸ {title.upper()}', size=12, bold=True, color=CYAN).pack(
             anchor='w', padx=12, pady=(10,4))
         neon_sep(f, BORDER).pack(fill='x', padx=12)
         inner = frame(f, color='transparent')
@@ -1040,7 +1040,7 @@ class SettingsPage(ctk.CTkFrame):
 
         # Days back
         r1 = self._cfg_row(sc, 'Event Log Lookback Period')
-        label(r1, 'DAYS TO SCAN:', size=10, color=TXT2).pack(side='left')
+        label(r1, 'DAYS TO SCAN:', size=13, color=TXT2).pack(side='left')
         dv = ctk.StringVar(value=str(self._settings.get('days_back',7)))
         self._vars['days_back'] = dv
         ctk.CTkSegmentedButton(r1, values=['1','3','7','14','30'],
@@ -1048,7 +1048,7 @@ class SettingsPage(ctk.CTkFrame):
                                 fg_color=CARD, selected_color=CYAN,
                                 selected_hover_color=CYAN,
                                 unselected_color=CARD, unselected_hover_color=BORDER,
-                                text_color=BG, font=('Consolas',11)
+                                text_color=BG, font=('Consolas',14)
                                 ).pack(side='right')
 
         # Log names
@@ -1059,7 +1059,7 @@ class SettingsPage(ctk.CTkFrame):
             v = ctk.BooleanVar(value=log in cur_logs)
             lv[log] = v
             ctk.CTkCheckBox(r2, text=log.upper(), variable=v,
-                             font=('Consolas',11), fg_color=CYAN,
+                             font=('Consolas',14), fg_color=CYAN,
                              hover_color=CYAN, text_color=TXT,
                              checkmark_color=BG).pack(anchor='w', pady=2)
         self._vars['log_vars'] = lv
@@ -1072,7 +1072,7 @@ class SettingsPage(ctk.CTkFrame):
             v = ctk.BooleanVar(value=cat.value in cur_cats)
             cv[cat.value] = v
             ctk.CTkCheckBox(r3, text=cat.value.upper(), variable=v,
-                             font=('Consolas',11), fg_color=CYAN,
+                             font=('Consolas',14), fg_color=CYAN,
                              hover_color=CYAN, text_color=TXT,
                              checkmark_color=BG).pack(anchor='w', pady=2)
         self._vars['cat_vars'] = cv
@@ -1085,7 +1085,7 @@ class SettingsPage(ctk.CTkFrame):
         self._vars['info'] = iv
         for text, v in [('AUTO-SCAN ON STARTUP', av), ('SHOW INFO-LEVEL ISSUES', iv)]:
             ctk.CTkCheckBox(r4, text=text, variable=v,
-                             font=('Consolas',11), fg_color=CYAN,
+                             font=('Consolas',14), fg_color=CYAN,
                              hover_color=CYAN, text_color=TXT,
                              checkmark_color=BG).pack(anchor='w', pady=2)
 
@@ -1093,14 +1093,14 @@ class SettingsPage(ctk.CTkFrame):
         f = frame(parent, color='transparent')
         f.pack(fill='x', padx=16, pady=16)
         r = self._cfg_row(f, 'UI Theme')
-        label(r, 'THEME:', size=10, color=TXT2).pack(side='left')
+        label(r, 'THEME:', size=13, color=TXT2).pack(side='left')
         tv = ctk.StringVar(value=self._settings.get('theme','dark').capitalize())
         self._vars['theme'] = tv
         ctk.CTkSegmentedButton(r, values=['Dark','Light','System'], variable=tv,
                                 fg_color=CARD, selected_color=CYAN,
                                 selected_hover_color=CYAN,
                                 unselected_color=CARD, text_color=BG,
-                                font=('Consolas',11),
+                                font=('Consolas',14),
                                 command=lambda v: ctk.set_appearance_mode(v.lower())
                                 ).pack(side='right')
 
@@ -1108,9 +1108,9 @@ class SettingsPage(ctk.CTkFrame):
         f = frame(parent, color='transparent')
         f.pack(fill='both', expand=True, padx=20, pady=20)
 
-        label(f, 'WINDIAG.EXE', size=20, bold=True, color=CYAN).pack(pady=(10,2))
-        label(f, 'Windows 10/11 Diagnostic & Repair Tool', size=11, color=TXT2).pack()
-        label(f, 'v1.0.0  //  Cyberpunk Edition', size=10, color=TXT3).pack(pady=(2,16))
+        label(f, 'WINDIAG.EXE', size=26, bold=True, color=CYAN).pack(pady=(10,2))
+        label(f, 'Windows 10/11 Diagnostic & Repair Tool', size=14, color=TXT2).pack()
+        label(f, 'v1.0.0  //  Cyberpunk Edition', size=13, color=TXT3).pack(pady=(2,16))
         neon_sep(f, CYAN_DIM).pack(fill='x', pady=8)
 
         for k, v in [
@@ -1122,16 +1122,16 @@ class SettingsPage(ctk.CTkFrame):
         ]:
             row = frame(f, color='transparent')
             row.pack(fill='x', pady=3)
-            label(row, f'{k}:', size=10, bold=True, color=CYAN_DIM).pack(side='left', padx=(0,12))
-            label(row, v[:60], size=10, color=TXT2).pack(side='left')
+            label(row, f'{k}:', size=13, bold=True, color=CYAN_DIM).pack(side='left', padx=(0,12))
+            label(row, v[:60], size=13, color=TXT2).pack(side='left')
 
         neon_sep(f, CYAN_DIM).pack(fill='x', pady=16)
         if not is_admin():
             btn(f, '[ RESTART AS ADMINISTRATOR ]',
                 cmd=lambda: (request_elevation(), sys.exit()),
-                w=280, h=36, fg=YELLOW_DIM, hv=YELLOW, tc=YELLOW).pack(pady=8)
+                w=340, h=44, fg=YELLOW_DIM, hv=YELLOW, tc=YELLOW).pack(pady=8)
             label(f, 'Required for SFC, DISM, network reset, and service fixes.',
-                  size=9, color=TXT3).pack()
+                  size=12, color=TXT3).pack()
 
     def _save(self):
         try: days = int(self._vars['days_back'].get())
@@ -1158,7 +1158,7 @@ class Toast(ctk.CTkToplevel):
 
         f = frame(self, color=CARD2, border_width=1, border_color=color)
         f.pack()
-        label(f, f'  {msg}  ', size=11, bold=True, color=color).pack(padx=4, pady=10)
+        label(f, f'  {msg}  ', size=14, bold=True, color=color).pack(padx=6, pady=12)
 
         self.update_idletasks()
         sw = self.winfo_screenwidth()
@@ -1173,7 +1173,7 @@ class FixDialog(ctk.CTkToplevel):
         super().__init__(parent)
         meta = FIX_MAP.get(fix_id)
         self.title('CONFIRM FIX')
-        self.geometry('480x280')
+        self.geometry('560x340')
         self.resizable(False, False)
         self.configure(fg_color=PANEL)
         self.attributes('-topmost', True)
@@ -1181,27 +1181,27 @@ class FixDialog(ctk.CTkToplevel):
 
         cv = tk.Canvas(self, bg=PANEL, highlightthickness=0, height=3)
         cv.pack(fill='x')
-        cv.create_line(0,1,480,1, fill=CYAN, width=2)
+        cv.create_line(0,1,560,1, fill=CYAN, width=2)
 
-        label(self, '// EXECUTE FIX', size=14, bold=True, color=CYAN).pack(pady=(16,4))
+        label(self, '// EXECUTE FIX', size=17, bold=True, color=CYAN).pack(pady=(18,4))
         name = meta.name.upper() if meta else fix_id
-        label(self, name, size=12, bold=True, color=TXT).pack()
+        label(self, name, size=15, bold=True, color=TXT).pack()
 
         if meta:
-            label(self, meta.description, size=10, color=TXT2,
-                  wraplength=400, justify='center').pack(pady=(8,4))
+            label(self, meta.description, size=13, color=TXT2,
+                  wraplength=480, justify='center').pack(pady=(10,4))
             if meta.requires_admin and not is_admin():
                 label(self, '⚠ REQUIRES ADMIN — MAY FAIL WITHOUT ELEVATION',
-                      size=9, bold=True, color=WARN).pack(pady=2)
+                      size=12, bold=True, color=WARN).pack(pady=2)
             label(self, f'EST. TIME: {meta.estimated_time.upper()}',
-                  size=9, color=TXT3).pack()
+                  size=12, color=TXT3).pack()
 
         brow = frame(self, color='transparent')
-        brow.pack(pady=20)
+        brow.pack(pady=22)
         btn(brow, '[ EXECUTE ]', cmd=lambda: (self.destroy(), on_confirm()),
-            w=120, h=34, fg=CYAN, hv=CYAN, tc=BG).pack(side='left', padx=10)
+            w=140, h=40, fg=CYAN, hv=CYAN, tc=BG).pack(side='left', padx=10)
         btn(brow, '[ CANCEL ]', cmd=self.destroy,
-            w=100, h=34, fg=BORDER, hv=BORDER2, tc=TXT2).pack(side='left')
+            w=120, h=40, fg=BORDER, hv=BORDER2, tc=TXT2).pack(side='left')
 
 # ── MAIN APP ───────────────────────────────────────────────────────────────────
 
@@ -1213,8 +1213,8 @@ class App(ctk.CTk):
         super().__init__()
 
         self.title('[ WINDIAG.EXE ]  —  Windows 10/11 Diagnostic Tool')
-        self.geometry('1360x840')
-        self.minsize(960, 620)
+        self.geometry('1600x1000')
+        self.minsize(1100, 750)
         self.configure(fg_color=BG)
 
         self._scanner  = DiagnosticScanner(settings=self._settings)
