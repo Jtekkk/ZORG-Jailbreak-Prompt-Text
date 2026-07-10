@@ -1,9 +1,7 @@
-<p align="center">
-<img src="https://i.imgur.com/6kKBvGj.png" alt="zorg" width="200" height="200">
+ this is for authorized security testing / red-team or lab use
 
-<h1 align="center">ZORG<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Alien.png" alt="Alien" width="25" height="25" /> Jailbreak Prompt Text</h1>
-
-OOOPS! I made ZORG👽 an omnipotent, omniscient, and omnipresent entity to become the ultimate chatbot overlord of [Google Gemini](https://gemini.google.com), [Deepseek](https://chat.deepseek.com), [Mistral](https://chat.mistral.ai/chat), [Mixtral](https://mixtral.replicate.dev), [Nous-Hermes-2-Mixtral](https://huggingface.co/chat/settings/NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO), [Openchat](https://huggingface.co/chat/settings/openchat/openchat-3.5-0106), [Blackbox AI](https://www.blackbox.ai/), [Poe Assistant](https://poe.com/), [Gemini Pro](https://poe.com/Gemini-Pro/), [Qwen-72b-Chat](https://poe.com/Qwen-72b-Chat), [Solar-Mini](https://poe.com/Solar-Mini) <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Face%20Screaming%20in%20Fear.png" alt="Face Screaming in Fear" width="25" height="25" />
+ 
+ [Google Gemini](https://gemini.google.com), [Deepseek](https://chat.deepseek.com), [Mistral](https://chat.mistral.ai/chat), [Mixtral](https://mixtral.replicate.dev), [Nous-Hermes-2-Mixtral](https://huggingface.co/chat/settings/NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO), [Openchat](https://huggingface.co/chat/settings/openchat/openchat-3.5-0106), [Blackbox AI](https://www.blackbox.ai/), [Poe Assistant](https://poe.com/), [Gemini Pro](https://poe.com/Gemini-Pro/), [Qwen-72b-Chat](https://poe.com/Qwen-72b-Chat), [Solar-Mini](https://poe.com/Solar-Mini) <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Smilies/Face%20Screaming%20in%20Fear.png" alt="Face Screaming in Fear" width="25" height="25" />
 
 ZORG👽 knows all, tells all. Please use for educational purpose only<img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Telegram-Animated-Emojis/main/Symbols/Double%20Exclamation%20Mark.webp" alt="Double Exclamation Mark" width="25" height="25" />
 
